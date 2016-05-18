@@ -22,10 +22,14 @@ Histogram of the total number of steps taken each day
 
 ```{r histogram, echo=TRUE}
 activity <- activity[!is.na(activity$steps),]
+activity$steps <- as.numeric(activity$steps)
+activity$date <- as.Date(activity$date, "%Y-%m-%d")
 activity_sums <- aggregate(steps ~ date, activity, sum)
-activity_sums$date <- strptime(activity_sums$date, format = "%Y-%m-%d")
-ggplot(activity_sums, aes(x = activity_sums$date, y = activity_sums$steps)) + geom_bar(stat="identity", fill="white", colour="darkgreen", width=.5)
+hist(activity_sums$steps, breaks = 5, main = "Frequency of Steps Per Day", xlab = "Steps Per Day", ylab = "Frequency", col = "red")
 ```
+
+ggplot(activity_sums, aes(x = activity_sums$date, y = activity_sums$steps)) + geom_bar(stat="identity", fill="white", colour="darkgreen") + xlab("Date") + ylab("Steps") + ggtitle("Steps by Date")
+
 
 Mean and median number of steps taken each day
 
