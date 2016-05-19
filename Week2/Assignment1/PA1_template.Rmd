@@ -19,14 +19,14 @@ activity <- read.csv("data/activity.csv", stringsAsFactors = FALSE)
 
 Convert Steps to a Numeric and Dates to the Date datatype
 ```{r convert, echo=TRUE}
-activity <- activity[!is.na(activity$steps),]
-activity$steps <- as.numeric(activity$steps)
-activity$date <- as.Date(activity$date, "%Y-%m-%d")
+activity_na_rm <- activity[!is.na(activity$steps),]
+activity_na_rm$steps <- as.numeric(activity_na_rm$steps)
+activity_na_rm$date <- as.Date(activity_na_rm$date, "%Y-%m-%d")
 ```
 
 Lets calculate the mean total number of steps taken per day. But first lets visualize the data in a histogram of the total number of steps taken each day.
 ```{r histogram, echo=TRUE}
-activity_sums <- aggregate(steps ~ date, activity, sum)
+activity_sums <- aggregate(steps ~ date, activity_na_rm, sum)
 hist(activity_sums$steps, breaks = 5, main = "Frequency of Steps Per Day", xlab = "Steps Per Day", ylab = "Frequency", col = "red")
 ```
 
@@ -42,13 +42,22 @@ median(activity_sums$steps)
 
 Lets visualize the average daily activity pattern by generating a time series plot of the average number of steps taken.
 ```{r timeseriesplot, echo=TRUE}
-meansteps_per_interval <- tapply(X = activity$steps, INDEX = activity$interval, FUN = mean)
-plot(x = unique(activity$interval), y = meansteps_per_interval, type = "l", main = "Average Steps Taken at Interval (5min)", xlab = "Interval (5min)", ylab = "Average Steps", col = "red")
+meansteps_per_interval <- tapply(X = activity_na_rm$steps, INDEX = activity_na_rm$interval, FUN = mean)
+plot(x = unique(activity_na_rm$interval), y = meansteps_per_interval, type = "l", main = "Average Steps Taken at Interval (5min)", xlab = "Interval (5min)", ylab = "Average Steps", col = "red")
 ```
 
-From the time series plot we can see that the average maximum number of steps occur between interval 500 and 1000. Lets calculate the exact interval.
+From the time series plot we can see that the average maximum number of steps occur between interval 500 and 1000, but its hard to tell the exact interval. Lets calculate the exact interval.
 ```{r maxinterval, echo=TRUE}
 meansteps_per_interval <- data.frame(interval = names(meansteps_per_interval), avg_steps = meansteps_per_interval, stringsAsFactors = FALSE)
 max_interval <- max(meansteps_per_interval$avg_steps)
-meansteps_per_interval[meansteps_per_interval$avg_steps == max_interval,]$interval
+max_steps_interval <- meansteps_per_interval[meansteps_per_interval$avg_steps == max_interval,]$interval
+max_steps_interval
+```
+We now know that on average the most steps occur during the interval `r max_steps_interval`.
+
+Note that there are a number of days/intervals where there are missing values (coded as 𝙽𝙰). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+Lets calculate the total number of missing values.
+```{r ,echo=TRUE}
+nrow(activity[is.na(activity$steps),])
 ```
