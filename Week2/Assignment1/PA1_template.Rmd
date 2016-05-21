@@ -31,15 +31,15 @@ hist(activity_sums$steps, breaks = 5, main = "Frequency of Steps Per Day", xlab 
 ```
 
 Now lets calculate the mean and median number of steps taken each day
+Mean:
 ```{r mean, echo=TRUE}
-mean_steps <- mean(activity_sums$steps)
+round(mean(activity_sums$steps))
 ```
-Mean:`r mean_steps`
 
+Median:
 ```{r median, echo=TRUE}
-median_steps <- median(activity_sums$steps)
+round(median(activity_sums$steps))
 ```
-Median:`r median_steps`
 
 Now that we know a little bit more about the average step count lets try and figure out at what time the subjects walk the most.
 
@@ -81,3 +81,44 @@ activity_sums_no_nas <- aggregate(steps ~ date, activity, sum)
 hist(activity_sums_no_nas$steps, breaks = 5, main = "Frequency of Steps Per Day", xlab = "Steps Per Day", ylab = "Frequency", col = "red")
 ```
 
+Now lets calculate the mean and median number of steps taken each day with the missing data filled in.
+Mean:
+```{r mean2, echo=TRUE}
+round(mean(activity_sums_no_nas$steps))
+```
+
+Median:
+```{r median2, echo=TRUE}
+round(median(activity_sums_no_nas$steps))
+```
+
+We can see not much has change in the form of mean and median from when we just removed the NA's.
+
+Now we will look at the trends of steps between weekend and weekday. To do this we will split the data between two factors "weekend" and "weekday".
+
+```{r weekday_factor, echo=TRUE}
+
+library(ggplot2)
+
+weekday <- function(aDate) {
+    wd <- weekdays(aDate)
+    if  (wd == 'Saturday' || wd == 'Sunday') {
+        x <- 'weekend'
+    } else {
+        x <- 'weekday'
+    }
+    x
+}
+
+activity_na_rm$daytype <- as.factor(sapply(activity_na_rm$date, weekday))
+
+activity_na_rm <- aggregate(steps ~ interval+daytype, activity_na_rm, mean)
+
+plt <- ggplot(activity_na_rm, aes(interval, steps)) + geom_line(stat = "identity", aes(colour = daytype)) +
+    facet_grid(daytype ~ ., scales="fixed", space="fixed") + xlab("Interval") +
+    ylab("Number of Steps") + ggtitle("Number of steps Per Interval by Weekend/Weekday")
+
+print(plt)
+```
+
+We can see that during the weekdays subjects tend to start off strong but slow down later on in the week. During the weekend we see a better distribution between the intervals.
